@@ -1,0 +1,25 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "net.skoumal.joogar.example"
+        minSdkVersion 11
+        targetSdkVersion 21
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    compile project (':joogar')
+    compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.facebook.stetho:stetho:1.1.0'
+    testCompile 'junit:junit:4.12'
+}
