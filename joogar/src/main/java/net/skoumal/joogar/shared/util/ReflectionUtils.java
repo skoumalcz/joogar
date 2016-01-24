@@ -161,8 +161,9 @@ public abstract class ReflectionUtils {
                 } catch (Exception e) {
                     Joogar.getInstance().getLogger().e("Enum cannot be read from Sqlite3 database. Please check the type of field " + field.getName());
                 }
-            } else
-                Joogar.getInstance().getLogger().e("Class cannot be read from Sqlite3 database. Please check the type of field " + field.getName() + "(" + field.getType().getName() + ")");
+            } else {
+                Joogar.getInstance().getLogger().e("Class " + object.getClass().getName() + "cannot be read from Sqlite3 database. Please check the type of field " + field.getName() + "(" + field.getType().getName() + ")");
+            }
         } catch (IllegalArgumentException e) {
             Joogar.getInstance().getLogger().e("IllegalArgumentException: " + e.getMessage());
         } catch (IllegalAccessException e) {
