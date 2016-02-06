@@ -1,7 +1,5 @@
 package net.skoumal.joogar.shared.util;
 
-import android.text.TextUtils;
-
 import net.skoumal.joogar.shared.Joogar;
 import net.skoumal.joogar.shared.JoogarDatabase;
 import net.skoumal.joogar.shared.JoogarDatabaseResult;
@@ -77,7 +75,7 @@ public class SchemaGenerator {
             for (TableColumn column : result) {
                 String columnName1 = column.name.toLowerCase(Locale.UK);
                 String columnName2 = columnName.toLowerCase(Locale.UK);
-                if (TextUtils.equals(columnName1, columnName2)) {
+                if (columnName1.equals(columnName2)/*TextUtils.equals(columnName1, columnName2)*/) {
                     columnInTable = column;
                     break;
                 }
