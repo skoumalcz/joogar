@@ -218,7 +218,8 @@
 }
 
 + (BOOL)bindText:(sqlite3_stmt *)stmt value:(NSString *)text at:(NSInteger)index {
-    return sqlite3_bind_text(stmt, (int)index, [text UTF8String], (int)text.length, SQLITE_STATIC) == SQLITE_OK;
+    const char* cString = [text cStringUsingEncoding:NSUTF8StringEncoding];
+    return sqlite3_bind_text(stmt, (int)index, cString, (int)strlen(cString), SQLITE_STATIC) == SQLITE_OK;
 }
 
 @end
