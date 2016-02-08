@@ -32,7 +32,11 @@
 }
 
 - (id)getFieldValueNativeWithId:(id)gObject withJavaLangReflectField:(JavaLangReflectField *)gField {
-    return [gObject valueForKey:[self fieldName:[gField getName]]];
+    id value = [gObject valueForKey:[self fieldName:[gField getName]]];
+    if ([gField getType] == [IOSClass booleanClass])
+        return JavaLangBoolean_valueOfWithBoolean_([(NSNumber*)value integerValue] == 1 ? YES : NO);
+    else
+        return value;
 }
 
 @end

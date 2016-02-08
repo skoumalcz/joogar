@@ -72,10 +72,8 @@ public abstract class ReflectionUtils {
                         columnType.equals(Float.class) || columnType.equals(float.class) ||
                         columnType.equals(Double.class) || columnType.equals(double.class)) {
                     return columnValue;
-                } else if (columnType.equals(Boolean.class)) {
+                } else if (columnType.equals(Boolean.class) || columnType.equals(boolean.class)) {
                     return ((Boolean) columnValue) ? 1 : 0;
-                } else if (columnType.equals(boolean.class)) {
-                    return ((boolean) columnValue) ? 1 : 0;
                 } else if (columnType.getName().equals("[B")) {
                     return columnValue;
                 } else if (columnType.isEnum()) {
