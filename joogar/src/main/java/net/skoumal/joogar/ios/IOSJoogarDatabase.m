@@ -116,7 +116,8 @@
     for (NSInteger index = 1; index <= [arguments length]; index++) {
         id object = [arguments objectAtIndex:index - 1];
         if (!object) {
-            [statement bindNull:index];
+            //[statement bindNull:index];
+            [statement bindInt:0 at:index];
         } else if ([object isKindOfClass:[IOSByteArray class]]) {
             IOSByteArray *array = (IOSByteArray *)object;
             NSData *data = [NSData dataWithBytes:array.buffer length:array.length];
