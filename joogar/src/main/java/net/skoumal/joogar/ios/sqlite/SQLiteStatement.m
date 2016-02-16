@@ -7,6 +7,7 @@
 //
 
 #import "SQLiteStatement.h"
+#import "SQLiteDB.h"
 
 @interface SQLiteStatement () {
     sqlite3_stmt *statement; 
@@ -147,7 +148,9 @@
 }
 
 + (BOOL)finalize:(sqlite3_stmt *)stmt {
-    return sqlite3_finalize(stmt) == SQLITE_OK;
+    BOOL ret = sqlite3_finalize(stmt) == SQLITE_OK;
+    [[SQLiteDB databaseLock] unlock];
+    return ret;
 }
 
 + (NSInteger)columnCount:(sqlite3_stmt *)stmt {

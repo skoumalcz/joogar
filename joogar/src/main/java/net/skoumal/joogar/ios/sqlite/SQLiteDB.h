@@ -24,6 +24,9 @@
 //! Create database with file path
 - (instancetype)initWithFilePath:(NSString *)filePath;
 
+//! Used to lock access to DB to one thread
++ (NSRecursiveLock*)databaseLock;
+
 //! Open database
 - (BOOL)open;
 //! Close database

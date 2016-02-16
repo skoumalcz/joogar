@@ -20,13 +20,21 @@
 //! Statement cache
 @property (nonatomic, strong) NSMutableDictionary *stmtCache;
 
-@property (nonatomic, strong) NSRecursiveLock *lock;
+//@property (nonatomic, strong) NSRecursiveLock *lock;
 
 @end
 
 
 
 @implementation SQLiteDB
+
+//! Return static instance of lock
++ (NSRecursiveLock*)databaseLock {
+    static NSRecursiveLock *lock = nil;
+    if (lock == nil)
+        lock = [[NSRecursiveLock alloc] init];
+    return lock;
+}
 
 //! Create database with file path
 + (instancetype)databaseWithFilePath:(NSString *)filePath {
@@ -37,7 +45,6 @@
 - (instancetype)initWithFilePath:(NSString *)filePath {
     self = [super init];
     if (self) {
-        self.lock = [[NSRecursiveLock alloc] init];
         // Save file path
         self.path = filePath;
         // Create cache
@@ -67,7 +74,8 @@
 
 //! Compile and preprate query
 - (SQLiteStatement *)prepare:(NSString *)query {
-    [self.lock lock];
+    [[SQLiteDB databaseLock] lock];
+    
     // Get cache
     SQLiteStatement *statement = [self.stmtCache valueForKey:query];
     if (!statement) {
@@ -87,30 +95,32 @@
         // Clear bindings
         [statement clearBindings];
     }
-    [self.lock unlock];
     // Return statement
     return statement;
 }
 
 - (sqlite3_stmt *)prepareRaw:(NSString *)query {
+    [[SQLiteDB databaseLock] lock];
+    
     sqlite3_stmt *stmt = nil;
     if (!(sqlite3_prepare_v2(database, [query UTF8String], -1, &stmt, NULL) == SQLITE_OK)) {
         [self logError];
         return nil;
     }
+    
     return stmt;
 }
 
 //! Execute query
 - (int)execute:(NSString *)query {
-    [self.lock lock];
+    [[SQLiteDB databaseLock] lock];
+    
     // Prepare
     SQLiteStatement *statement = [self prepare:query];
     if (!statement)
         return sqlite3_errcode(database);
     // Execute query
     BOOL result = [statement next];
-    [self.lock unlock];
     return result;
 }
 
