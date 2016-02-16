@@ -20,6 +20,8 @@
 //! Statement cache
 @property (nonatomic, strong) NSMutableDictionary *stmtCache;
 
+@property (nonatomic, strong) NSRecursiveLock *lock;
+
 @end
 
 
@@ -35,6 +37,7 @@
 - (instancetype)initWithFilePath:(NSString *)filePath {
     self = [super init];
     if (self) {
+        self.lock = [[NSRecursiveLock alloc] init];
         // Save file path
         self.path = filePath;
         // Create cache
@@ -64,6 +67,7 @@
 
 //! Compile and preprate query
 - (SQLiteStatement *)prepare:(NSString *)query {
+    [self.lock lock];
     // Get cache
     SQLiteStatement *statement = [self.stmtCache valueForKey:query];
     if (!statement) {
@@ -83,6 +87,7 @@
         // Clear bindings
         [statement clearBindings];
     }
+    [self.lock unlock];
     // Return statement
     return statement;
 }
@@ -98,12 +103,15 @@
 
 //! Execute query
 - (int)execute:(NSString *)query {
+    [self.lock lock];
     // Prepare
     SQLiteStatement *statement = [self prepare:query];
     if (!statement)
         return sqlite3_errcode(database);
     // Execute query
-    return [statement next];
+    BOOL result = [statement next];
+    [self.lock unlock];
+    return result;
 }
 
 //! Return number of changes
