@@ -10,6 +10,8 @@
 #import "java/lang/reflect/Field.h"
 #import "java/lang/reflect/Method.h"
 #import "java/lang/Boolean.h"
+#import "java/lang/Character.h"
+#import "java/lang/Byte.h"
 #import "JavaMetadata.h"
 
 @implementation IOSReflectionUtils
@@ -23,20 +25,31 @@
 }
 
 - (void)setFieldValueNativeWithId:(id)gObject withJavaLangReflectField:(JavaLangReflectField *)gField withId:(id)gValue {
-    if ([gValue isKindOfClass:[JavaLangBoolean class]]) {
+    NSString * const fieldName = [self fieldName:[gField getName]];
+    // Handle class Boolean and Character, these classes are NOT subclasses of NSNumber
+    IOSClass * const class = [gField getType];
+    if ([class isEqual:[IOSClass booleanClass]]) {
         JavaLangBoolean *b = gValue;
-        [gObject setValue:@((BOOL)[b booleanValue]) forKey:[self fieldName:[gField getName]]];
+        [gObject setValue:@((BOOL)[b booleanValue]) forKey:fieldName];
+    } else if ([class isEqual:[IOSClass charClass]]) {
+        JavaLangCharacter *c = gValue;
+        [gObject setValue:@((short)[c charValue]) forKey:fieldName];
     } else {
-        [gObject setValue:gValue forKey:[self fieldName:[gField getName]]];
+        [gObject setValue:gValue forKey:fieldName];
     }
 }
 
 - (id)getFieldValueNativeWithId:(id)gObject withJavaLangReflectField:(JavaLangReflectField *)gField {
     id value = [gObject valueForKey:[self fieldName:[gField getName]]];
-    if ([gField getType] == [IOSClass booleanClass])
-        return JavaLangBoolean_valueOfWithBoolean_([(NSNumber*)value integerValue] == 1 ? YES : NO);
-    else
+    // Handle class Boolean and Character, these classes are NOT subclasses of NSNumber
+    IOSClass * const class = [gField getType];
+    if ([class isEqual:[IOSClass booleanClass]]) {
+        return [[JavaLangBoolean alloc] initWithBoolean:[value boolValue]];
+    } else if ([class isEqual:[IOSClass charClass]]) {
+        return [[JavaLangCharacter alloc] initWithChar:[value shortValue]];
+    } else {
         return value;
+    }
 }
 
 @end

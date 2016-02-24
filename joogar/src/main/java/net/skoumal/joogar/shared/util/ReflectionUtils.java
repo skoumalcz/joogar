@@ -66,7 +66,9 @@ public abstract class ReflectionUtils {
                     return ((Date) columnValue).getTime();
                 } else if (Calendar.class.equals(columnType)) {
                     return ((Calendar) columnValue).getTimeInMillis();
-                } else if (columnType.equals(Integer.class) || columnType.equals(int.class) ||
+                } else if (columnType.equals(Byte.class) || columnType.equals(byte.class) ||
+						columnType.equals(Character.class) || columnType.equals(char.class) ||
+						columnType.equals(Integer.class) || columnType.equals(int.class) ||
                         columnType.equals(Short.class) || columnType.equals(short.class) ||
                         columnType.equals(Long.class) || columnType.equals(long.class) ||
                         columnType.equals(Float.class) || columnType.equals(float.class) ||
@@ -138,6 +140,10 @@ public abstract class ReflectionUtils {
                 setFieldValueNative(object, field, result.getFloat(columnIndex));
             } else if (fieldType.equals(short.class) || fieldType.equals(Short.class)) {
                 setFieldValueNative(object, field, (short) result.getInt(columnIndex));
+			} else if (fieldType.equals(char.class) || fieldType.equals(Character.class)) {
+				setFieldValueNative(object, field, (char) result.getInt(columnIndex));
+            } else if (fieldType.equals(byte.class) || fieldType.equals(Byte.class)) {
+				setFieldValueNative(object, field, (byte) result.getInt(columnIndex));
             } else if (fieldType.equals(BigDecimal.class)) {
                 String val = result.getString(columnIndex);
                 setFieldValueNative(object, field, val != null && val.equals("null") ? null : new BigDecimal(val));
