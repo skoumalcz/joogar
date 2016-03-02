@@ -141,7 +141,8 @@ public abstract class ReflectionUtils {
             } else if (fieldType.equals(short.class) || fieldType.equals(Short.class)) {
                 setFieldValueNative(object, field, (short) result.getInt(columnIndex));
 			} else if (fieldType.equals(char.class) || fieldType.equals(Character.class)) {
-				setFieldValueNative(object, field, (char) result.getInt(columnIndex));
+                char character = result.getString(columnIndex).charAt(0);
+				setFieldValueNative(object, field, character);
             } else if (fieldType.equals(byte.class) || fieldType.equals(Byte.class)) {
 				setFieldValueNative(object, field, (byte) result.getInt(columnIndex));
             } else if (fieldType.equals(BigDecimal.class)) {

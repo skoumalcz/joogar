@@ -216,10 +216,10 @@ public class JoogarRecord {
     }
 
     public static long save(Object object) {
-        return save(Joogar.getInstance().getDB(object.getClass()), object);
+        return saveInternal(object);
     }
 
-    static long save(JoogarDatabase db, Object object) {
+    private static long saveInternal(Object object) {
         List<Field> columns = Joogar.getInstance().getReflectionUtils().getTableFields(object.getClass());
 
         Object [] values = new Object[columns.size()];
@@ -341,7 +341,7 @@ public class JoogarRecord {
     }
 
     public long save() {
-        return save(Joogar.getInstance().getDB(getClass()), this);
+        return saveInternal(this);
     }
 
     /**
