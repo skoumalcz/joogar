@@ -224,7 +224,12 @@ public class JoogarTests extends AndroidTestCase {
     public void testGettingDBForUnmappedEntity() {
         Joogar.initForAndroid(getContext());
 
-        assertNull(Joogar.getInstance().getDB(BigDecimalFieldAnnotatedModel.class));
+        try {
+            Joogar.getInstance().getDB(BigDecimalFieldAnnotatedModel.class);
+            fail("Should throw RuntimeException");
+        } catch (RuntimeException e) {
+            // desired behaviour
+        }
     }
 
     public void testReinit() {
