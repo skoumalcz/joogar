@@ -85,9 +85,10 @@ public abstract class JoogarDatabase {
      */
     public int getVersion() {
         JoogarDatabaseResult result = rawQuery("PRAGMA user_version;", null);
-
         result.next();
-        return result.getInt(0);
+        int version = result.getInt(0);
+        result.close();
+        return version;
     }
 
     /**

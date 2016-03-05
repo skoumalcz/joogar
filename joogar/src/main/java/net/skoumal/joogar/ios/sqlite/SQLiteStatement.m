@@ -149,7 +149,7 @@
 
 + (BOOL)finalize:(sqlite3_stmt *)stmt {
     BOOL ret = sqlite3_finalize(stmt) == SQLITE_OK;
-    [[SQLiteDB databaseLock] unlock];
+    [SQLiteDB unlock];
     return ret;
 }
 

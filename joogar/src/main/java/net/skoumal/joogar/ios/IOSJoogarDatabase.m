@@ -96,9 +96,11 @@
     if (statement) {
         // Execute
         [statement next];
+        [statement close];
         return 0;
     } else {
         // Log error
+        [SQLiteDB unlock];
         [self.database logError];
         return -1;
     }
@@ -111,6 +113,7 @@
     [self bindToStatement:statement objects:gValue];
     // Execute
     [statement next];
+    [statement close];
     // Return number of changes
     return [self.database changes];
 }

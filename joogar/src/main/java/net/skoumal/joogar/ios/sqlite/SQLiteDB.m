@@ -31,9 +31,19 @@
 //! Return static instance of lock
 + (NSRecursiveLock*)databaseLock {
     static NSRecursiveLock *lock = nil;
-    if (lock == nil)
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
         lock = [[NSRecursiveLock alloc] init];
+    }); 
     return lock;
+}
+
++ (void)lock {
+    [[SQLiteDB databaseLock] lock];
+}
+
++ (void)unlock {
+    [[SQLiteDB databaseLock] unlock];
 }
 
 //! Create database with file path
@@ -74,7 +84,7 @@
 
 //! Compile and preprate query
 - (SQLiteStatement *)prepare:(NSString *)query {
-    [[SQLiteDB databaseLock] lock];
+    [SQLiteDB lock];
     
     // Get cache
     SQLiteStatement *statement = [self.stmtCache valueForKey:query];
@@ -100,7 +110,7 @@
 }
 
 - (sqlite3_stmt *)prepareRaw:(NSString *)query {
-    [[SQLiteDB databaseLock] lock];
+    [SQLiteDB lock];
     
     sqlite3_stmt *stmt = nil;
     if (!(sqlite3_prepare_v2(database, [query UTF8String], -1, &stmt, NULL) == SQLITE_OK)) {
@@ -113,7 +123,7 @@
 
 //! Execute query
 - (int)execute:(NSString *)query {
-    [[SQLiteDB databaseLock] lock];
+    [SQLiteDB lock];
     
     // Prepare
     SQLiteStatement *statement = [self prepare:query];
@@ -121,6 +131,7 @@
         return sqlite3_errcode(database);
     // Execute query
     BOOL result = [statement next];
+    [SQLiteDB unlock];
     return result;
 }
 

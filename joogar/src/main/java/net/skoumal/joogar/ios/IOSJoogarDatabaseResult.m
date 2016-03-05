@@ -9,6 +9,7 @@
 #import "IOSJoogarDatabaseResult.h"
 
 #import "IOSPrimitiveArray.h"
+#import "SQLiteDB.h"
 
 @interface IOSJoogarDatabaseResult ()
 
