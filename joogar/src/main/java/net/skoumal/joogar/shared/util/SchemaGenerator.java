@@ -47,6 +47,7 @@ public class SchemaGenerator {
             } else {
                 upgradeTable(domain);
             }
+            result.close();
         }
         executeJoogarUpgrade(gOldVersion, gNewVersion, false);
     }
@@ -87,6 +88,7 @@ public class SchemaGenerator {
                 upgradeTableColumn(table, field);
             }
         }
+        result.close();
     }
 
     private void createTableColumn(Class<?> gTable, Field gField) {

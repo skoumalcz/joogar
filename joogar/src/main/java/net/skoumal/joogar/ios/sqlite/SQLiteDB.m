@@ -8,6 +8,9 @@
 
 #import "SQLiteDB.h"
 
+// Log all lock and unlock database
+#define DEBUG_DEADLOCK  0
+
 @interface SQLiteDB () {
     // SQLite database
     sqlite3 *database;
@@ -19,8 +22,6 @@
 @property (nonatomic, assign, readwrite) NSString *path;
 //! Statement cache
 @property (nonatomic, strong) NSMutableDictionary *stmtCache;
-
-//@property (nonatomic, strong) NSRecursiveLock *lock;
 
 @end
 
@@ -38,12 +39,27 @@
     return lock;
 }
 
+#if DEBUG_DEADLOCK
+// Lock counter
+static long sharedLockCounter = 0;
+#endif
+
 + (void)lock {
+#if DEBUG_DEADLOCK
+    // Deadlock debug
+    NSLog(@"[SQLITE]: Lock (%li)", ++sharedLockCounter);
+#endif
+    
     [[SQLiteDB databaseLock] lock];
 }
 
 + (void)unlock {
     [[SQLiteDB databaseLock] unlock];
+    
+#if DEBUG_DEADLOCK
+    // Deadlock debug
+    NSLog(@"[SQLITE]: Unlock (%li)", --sharedLockCounter);
+#endif
 }
 
 //! Create database with file path
