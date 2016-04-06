@@ -2,6 +2,7 @@ package net.skoumal.joogar.shared.util;
 
 import net.skoumal.joogar.shared.dsl.Column;
 import net.skoumal.joogar.shared.dsl.Table;
+import net.skoumal.joogar.shared.dsl.TableIndex;
 
 import java.lang.reflect.Field;
 
@@ -84,6 +85,21 @@ public class NamingHelper {
         }
 
         return NamingHelper.toSQLNameDefault(table.getSimpleName());
+    }
+
+    public static String toSQLName(TableIndex gIndex, Class<?> gTable) {
+        StringBuilder indexName = new StringBuilder();
+        indexName.append("joogar_idx");
+        if(gIndex.unique()) {
+            indexName.append("_unq");
+        }
+        indexName.append(toSQLName(gTable));
+        for (String c : gIndex.columns()){
+            indexName.append("_");
+            indexName.append(c);
+        }
+
+        return indexName.toString();
     }
 
 }

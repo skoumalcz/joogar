@@ -15,11 +15,14 @@ import net.skoumal.joogar.util.model.ByteArrayExtendedModel;
 import net.skoumal.joogar.util.model.ByteExtendedModel;
 import net.skoumal.joogar.util.model.CharAnnotatedModel;
 import net.skoumal.joogar.util.model.CharExtendedModel;
+import net.skoumal.joogar.util.model.ClassIndexedModel;
+import net.skoumal.joogar.util.model.ClassMultiIndexedModel;
 import net.skoumal.joogar.util.model.ComposedExtendedModel;
 import net.skoumal.joogar.util.model.DoubleFieldAnnotatedModel;
 import net.skoumal.joogar.util.model.DoubleFieldExtendedModel;
 import net.skoumal.joogar.util.model.EnumFieldAnnotatedModel;
 import net.skoumal.joogar.util.model.EnumFieldExtendedModel;
+import net.skoumal.joogar.util.model.FieldIndexedModel;
 import net.skoumal.joogar.util.model.FloatFieldAnnotatedModel;
 import net.skoumal.joogar.util.model.FloatFieldExtendedModel;
 import net.skoumal.joogar.util.model.IncompleteAnnotatedModel;
@@ -72,10 +75,13 @@ public class CrudTestCase extends AndroidTestCase {
                         ByteExtendedModel.class,
                         CharAnnotatedModel.class,
                         CharExtendedModel.class,
+                        ClassIndexedModel.class,
+                        ClassMultiIndexedModel.class,
                         DoubleFieldAnnotatedModel.class,
                         DoubleFieldExtendedModel.class,
                         EnumFieldAnnotatedModel.class,
                         EnumFieldExtendedModel.class,
+                        FieldIndexedModel.class,
                         FloatFieldAnnotatedModel.class,
                         FloatFieldExtendedModel.class,
                         IncompleteAnnotatedModel.class,

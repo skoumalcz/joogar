@@ -1,5 +1,7 @@
 package net.skoumal.joogar.shared.util;
 
+import android.text.TextUtils;
+
 import net.skoumal.joogar.shared.Joogar;
 import net.skoumal.joogar.shared.JoogarDatabase;
 import net.skoumal.joogar.shared.JoogarDatabaseResult;
@@ -8,6 +10,7 @@ import net.skoumal.joogar.shared.cursor.JoogarCursor;
 import net.skoumal.joogar.shared.cursor.JoogarCursorImpl;
 import net.skoumal.joogar.shared.dsl.Column;
 import net.skoumal.joogar.shared.dsl.NotNull;
+import net.skoumal.joogar.shared.dsl.TableIndex;
 import net.skoumal.joogar.shared.dsl.Unique;
 
 import java.io.BufferedReader;
@@ -64,6 +67,7 @@ public class SchemaGenerator {
             Joogar.getInstance().getLogger().i("Upgrade table");
         }
 
+        // fields
         List<Field> classFields = Joogar.getInstance().getReflectionUtils().getTableFields(table);
         String tableName = NamingHelper.toSQLName(table);
         JoogarCursor<TableColumn> result = new JoogarCursorImpl<TableColumn>(TableColumn.class,
@@ -89,6 +93,71 @@ public class SchemaGenerator {
             }
         }
         result.close();
+
+        // fields
+        List<TableIndex> classIndexes = Joogar.getInstance().getReflectionUtils().getTableIndexes(table);
+        List<DatabaseIndex> tableIndexes = new JoogarCursorImpl<DatabaseIndex>(DatabaseIndex.class,
+                database.rawQuery("PRAGMA index_list (\"" + tableName + "\")", null)).toListAndClose();
+
+        for (TableIndex ti : classIndexes) {
+            String indexName = NamingHelper.toSQLName(ti, table);
+
+            boolean found = false;
+            for(int i = 0; i < tableIndexes.size(); i++) {
+                if(TextUtils.equals(indexName, tableIndexes.get(i).name)) {
+                    tableIndexes.remove(i);
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found) {
+                createTableIndex(ti, table);
+            }
+        }
+
+        for(DatabaseIndex dbIndex : tableIndexes) {
+            if(dbIndex.name.startsWith("joogar_idx_")) {
+                deleteTableIndex(dbIndex, tableName);
+            }
+        }
+    }
+
+    private void deleteTableIndex(DatabaseIndex gIndex, String gTableName) {
+        StringBuilder sb = new StringBuilder("DROP ");
+        sb.append("INDEX \"");
+        sb.append(gIndex.name);
+        sb.append("\"");
+
+        database.execSQL(sb.toString(), null);
+    }
+
+    private void createTableIndex(TableIndex gIndex, Class gTable) {
+        String indexName = NamingHelper.toSQLName(gIndex, gTable);
+
+        StringBuilder sb = new StringBuilder("CREATE ");
+        if(gIndex.unique()) {
+            sb.append("UNIQUE ");
+        }
+        sb.append("INDEX \"");
+        sb.append(indexName).append("\" ");
+        sb.append("ON \"");
+        sb.append(NamingHelper.toSQLName(gTable)).append("\" (");
+
+        boolean first = true;
+        for(String column : gIndex.columns()) {
+            if(first) {
+                first = false;
+            } else {
+                sb.append(",");
+            }
+
+            sb.append(column);
+        }
+
+        sb.append(")");
+
+        database.execSQL(sb.toString(), null);
     }
 
     private void createTableColumn(Class<?> gTable, Field gField) {
@@ -264,6 +333,7 @@ public class SchemaGenerator {
     }
 
     public static class TableColumn {
+
         @Column(name = "name")
         public String name;
 
@@ -278,6 +348,15 @@ public class SchemaGenerator {
 
         @Column(name = "pk")
         public boolean pk;
+    }
+
+    public static class DatabaseIndex {
+
+        @Column(name = "name")
+        public String name;
+
+        @Column(name = "unique")
+        public boolean unique;
     }
 
 }

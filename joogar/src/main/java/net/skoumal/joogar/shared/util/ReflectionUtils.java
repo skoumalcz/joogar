@@ -3,6 +3,9 @@ package net.skoumal.joogar.shared.util;
 import net.skoumal.joogar.shared.Joogar;
 import net.skoumal.joogar.shared.JoogarDatabaseResult;
 import net.skoumal.joogar.shared.dsl.Ignore;
+import net.skoumal.joogar.shared.dsl.Index;
+import net.skoumal.joogar.shared.dsl.TableIndex;
+import net.skoumal.joogar.shared.dsl.TableIndexes;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -11,6 +14,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +41,48 @@ public abstract class ReflectionUtils {
 
         JoogarConfig.setFields(table, toStore);
         return toStore;
+    }
+
+    public List<TableIndex> getTableIndexes(Class table) {
+        List<Field> fieldList = getTableFields(table);
+
+        ArrayList<TableIndex> tableIndexList = new ArrayList<TableIndex>();
+        for (Field field : fieldList) {
+            if (field.isAnnotationPresent(Index.class)) {
+                Index index = field.getAnnotation(Index.class);
+                tableIndexList.add(new TableIndex.TableIndexImpl(new String[] { NamingHelper.toSQLName(field) }, false));
+            }
+        }
+
+        TableIndex tableIndex = (TableIndex) table.getAnnotation(TableIndex.class);
+        if(tableIndex != null) { // is there any index?
+            tableIndexList.add(createTableIndex(tableIndex, table));
+        }
+
+        TableIndexes tableIndexes = (TableIndexes) table.getAnnotation(TableIndexes.class);
+        if(tableIndexes != null) { // are there any indexes?
+            for (TableIndex ti : tableIndexes.indexes()) {
+                tableIndexList.add(createTableIndex(ti, table));
+            }
+        }
+
+        return tableIndexList;
+    }
+
+    private TableIndex createTableIndex(TableIndex gTableIndex, Class table) {
+        String [] columns = new String[gTableIndex.columns().length];
+
+        for(int i = 0; i < gTableIndex.columns().length; i++) {
+            String c = gTableIndex.columns() [i];
+
+            try {
+                columns[i] = NamingHelper.toSQLName(table.getField(c));
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException("Field \"" + c + "\" does not exists in class \"" + table.getName() + "\"");
+            }
+        }
+
+        return new TableIndex.TableIndexImpl(columns, gTableIndex.unique());
     }
 
     private List<Field> getAllFields(List<Field> fields, Class<?> type) {
