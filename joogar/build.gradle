@@ -13,8 +13,8 @@ ext {
     siteUrl = 'https://github.com/skoumalcz/joogar'
     gitUrl = 'https://github.com/skoumalcz/joogar.git'
 
-    libraryVersion = '0.1.4'
-    libraryVersionCode = 104
+    libraryVersion = '0.1.5'
+    libraryVersionCode = 105
 
     developerId = 'skoumal'
     developerName = 'SKOUMAL, s.r.o.'
@@ -44,7 +44,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.0.0'
+    //compile 'com.android.support:appcompat-v7:22.0.0'
     testCompile 'junit:junit:4.12'
 }
 

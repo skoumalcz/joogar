@@ -1,7 +1,5 @@
 package net.skoumal.joogar.integration;
 
-import android.support.annotation.NonNull;
-
 import net.skoumal.joogar.shared.JoogarRecord;
 import net.skoumal.joogar.shared.cursor.JoogarCursor;
 import net.skoumal.joogar.util.CrudTestCase;
@@ -40,7 +38,6 @@ public class BulkSaveTests extends CrudTestCase {
         }
     }
 
-    @NonNull
     private List<StringFieldExtendedModel> prepareEntityList() {
         List<StringFieldExtendedModel> modelList = new ArrayList<>(10);
 

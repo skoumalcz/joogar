@@ -16,7 +16,7 @@ Download the latest JAR:
 or via Gradle:
 
 ```groovy
-compile 'net.skoumal.joogar:joogar:0.1.2'
+compile 'net.skoumal.joogar:joogar:0.1.5'
 ```
 
 
