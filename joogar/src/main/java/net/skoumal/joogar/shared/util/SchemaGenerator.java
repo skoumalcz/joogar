@@ -33,9 +33,18 @@ public class SchemaGenerator {
         databaseName = gDbName;
     }
 
+    /**
+     * Dedicated for creating database.
+     * @param gDomainClasses database clases
+     * @param gVersion version
+     * @deprecated no longer used
+     */
+    @Deprecated
     public void createDatabase(List<Class> gDomainClasses, int gVersion) {
         for (Class domain : gDomainClasses) {
             createTable(domain);
+
+            upgradeTableIndexes(domain);
         }
 
         executeJoogarUpgrade(0, gVersion, true);
@@ -50,6 +59,9 @@ public class SchemaGenerator {
             } else {
                 upgradeTable(domain);
             }
+
+            upgradeTableIndexes(domain);
+
             result.close();
         }
         executeJoogarUpgrade(gOldVersion, gNewVersion, false);
@@ -93,8 +105,10 @@ public class SchemaGenerator {
             }
         }
         result.close();
+    }
 
-        // fields
+    private void upgradeTableIndexes(Class table) {
+        String tableName = NamingHelper.toSQLName(table);
         List<TableIndex> classIndexes = Joogar.getInstance().getReflectionUtils().getTableIndexes(table);
         List<DatabaseIndex> tableIndexes = new JoogarCursorImpl<DatabaseIndex>(DatabaseIndex.class,
                 database.rawQuery("PRAGMA index_list (\"" + tableName + "\")", null)).toListAndClose();
