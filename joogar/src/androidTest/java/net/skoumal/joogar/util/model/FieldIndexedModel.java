@@ -10,7 +10,7 @@ import net.skoumal.joogar.shared.dsl.TableIndex;
 @TableIndex(columns = {"driverName", "count"})
 public class FieldIndexedModel extends JoogarRecord {
 
-    @Index()
+    @Index
     public String driverName;
     public long count;
 }
