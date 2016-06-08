@@ -96,6 +96,7 @@ public class Joogar {
         //TODO [3] implement attach database functionality:
         // https://www.sqlite.org/lang_attach.html
         // attaching should be preferred way to add more databases
+        // be careful with WAL mode, since it broke atomicity of commits as mentioned on the link above
         JoogarDatabase database = gBuilder.build(objectFactory);
 
         // keep reference to database

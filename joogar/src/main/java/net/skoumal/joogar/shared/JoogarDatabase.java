@@ -20,11 +20,13 @@ public abstract class JoogarDatabase {
 
     private File path;
 
+    private boolean walMode;
+
     /**
      * Create new database object.
      * @param gPath path to database file
      */
-    public JoogarDatabase(File gPath) {
+    public JoogarDatabase(File gPath, boolean gWalMode) {
         path = gPath;
     }
 
@@ -101,7 +103,11 @@ public abstract class JoogarDatabase {
     }
 
     public void openTransaction() {
-        execSQL("BEGIN TRANSACTION", null);
+        if(walMode) { // immediate transaction in WAL mode allows parallel reads and write
+            execSQL("BEGIN IMMEDIATE TRANSACTION", null);
+        } else {
+            execSQL("BEGIN TRANSACTION", null);
+        }
     }
 
     public void commitTransaction() {

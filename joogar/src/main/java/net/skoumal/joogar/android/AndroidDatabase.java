@@ -22,6 +22,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Build;
 import android.text.TextUtils;
 
 import net.skoumal.joogar.android.util.JoogarCursorFactory;
@@ -44,15 +45,14 @@ public class AndroidDatabase extends JoogarDatabase {
 
     private Hashtable<String, SQLiteStatement> precompiledStatements = new Hashtable<String, SQLiteStatement>();
 
-    public AndroidDatabase(File gPath) {
-        super(gPath);
+    public AndroidDatabase(File gPath, boolean gWalMode) {
+        super(gPath, gWalMode);
 
-        db = SQLiteDatabase.openDatabase(gPath.getPath(), new JoogarCursorFactory(),
-                SQLiteDatabase.CREATE_IF_NECESSARY);
+        openDatabase(gPath, gWalMode);
     }
 
-    public AndroidDatabase(String gName, Context gContext) {
-        super(gContext.getDatabasePath(gName));
+    public AndroidDatabase(String gName, Context gContext, boolean gWalMode) {
+        super(gContext.getDatabasePath(gName), gWalMode);
 
         File path = getPath();
         File directory = path.getParentFile();
@@ -61,8 +61,20 @@ public class AndroidDatabase extends JoogarDatabase {
             directory.mkdirs();
         }
 
-        db = SQLiteDatabase.openDatabase(path.getPath(), new JoogarCursorFactory(),
-                SQLiteDatabase.CREATE_IF_NECESSARY);
+        openDatabase(path, gWalMode);
+    }
+
+    private void openDatabase(File gPath, boolean gWalMode) {
+        int flags = 0;
+        flags = SQLiteDatabase.CREATE_IF_NECESSARY;
+        if(gWalMode) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                flags = flags | SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;
+            } else {
+                throw new RuntimeException("WAL is not supported on API levels below 16.");
+            }
+        }
+        db = SQLiteDatabase.openDatabase(gPath.getPath(), new JoogarCursorFactory(), flags);
     }
 
     @Override

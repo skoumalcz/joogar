@@ -42,13 +42,13 @@ public class AndroidObjectFactory implements JoogarObjectAbstractFactory {
     }
 
     @Override
-    public JoogarDatabase getDatabase(String gName) {
-        return new AndroidDatabase(gName, context);
+    public JoogarDatabase getDatabase(String gName, boolean gWalMode) {
+        return new AndroidDatabase(gName, context, gWalMode);
     }
 
     @Override
-    public JoogarDatabase getDatabase(File gPath) {
-        return new AndroidDatabase(gPath);
+    public JoogarDatabase getDatabase(File gPath, boolean gWalMode) {
+        return new AndroidDatabase(gPath, gWalMode);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package net.skoumal.joogar.shared;
 
+import android.os.Build;
+
 import net.skoumal.joogar.shared.util.SchemaGenerator;
 
 import java.io.File;
@@ -16,6 +18,11 @@ public class JoogarDatabaseBuilder {
     private File dbPath;
     private String dbName = "joogar";
     private List<Class> domainClasses;
+
+    /**
+     * Enables write-ahead-log mode. Cannot be enabled for API levels below 16.
+     */
+    private boolean walMode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
 
     /**
      * Sets database version. It fires migration of database structure if this version is higher
@@ -73,6 +80,22 @@ public class JoogarDatabaseBuilder {
         return domainClasses;
     }
 
+    /**
+     * Enables write-ahead-log (WAL) mode. Cannot be enabled for API levels below 16, for those will be
+     * silently ignored. For API level 16 and higher is WAL enabled by default because of better
+     * performance in most of use-cases and ability to read while performing transaction in the other
+     * thread.
+     *
+     * @param gWalMode true to enable write-ahead-log mode
+     */
+    public void setWalMode(boolean gWalMode) {
+        walMode = gWalMode && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+    }
+
+    public boolean isWalMode() {
+        return walMode;
+    }
+
     public JoogarDatabase build(JoogarObjectAbstractFactory gObjectFactory) {
         JoogarDatabase db = createDatabase(gObjectFactory);
 
@@ -95,9 +118,9 @@ public class JoogarDatabaseBuilder {
     private JoogarDatabase createDatabase(JoogarObjectAbstractFactory gObjectFactory) {
         JoogarDatabase db;
         if (dbPath != null) {
-            db = gObjectFactory.getDatabase(dbPath);
+            db = gObjectFactory.getDatabase(dbPath, walMode);
         } else if (dbName != null) {
-            db = gObjectFactory.getDatabase(dbName);
+            db = gObjectFactory.getDatabase(dbName, walMode);
         } else {
             throw new InvalidParameterException("Please define database path or name.");
         }

@@ -12,8 +12,8 @@ public class JoogarDatabaseBuilderTests extends AndroidTestCase {
 
     public void testMinimalVersion() {
         try {
-            JoogarDatabaseBuilder builder = new JoogarDatabaseBuilder()
-                    .setVersion(0);
+            JoogarDatabaseBuilder builder = new JoogarDatabaseBuilder();
+            builder.setVersion(0);
             fail("Minimal allowed version should be 1");
         } catch (IllegalArgumentException e) {
             // correct behaviour

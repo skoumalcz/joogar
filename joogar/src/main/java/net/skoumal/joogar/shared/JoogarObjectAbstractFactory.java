@@ -11,9 +11,9 @@ public interface JoogarObjectAbstractFactory {
 
     public JoogarLogger getLogger();
 
-    public JoogarDatabase getDatabase(String gName);
+    public JoogarDatabase getDatabase(String gName, boolean gWalMode);
 
-    public JoogarDatabase getDatabase(File gPath);
+    public JoogarDatabase getDatabase(File gPath, boolean gWalMode);
 
     public SystemUtils getSystemUtils();
 
