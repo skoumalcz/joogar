@@ -71,7 +71,7 @@ public class AndroidDatabase extends JoogarDatabase {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 flags = flags | SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;
             } else {
-                throw new RuntimeException("WAL is not supported on API levels below 16.");
+                Joogar.getInstance().getLogger().w("WAL is not supported on API levels below 16.");
             }
         }
         db = SQLiteDatabase.openDatabase(gPath.getPath(), new JoogarCursorFactory(), flags);

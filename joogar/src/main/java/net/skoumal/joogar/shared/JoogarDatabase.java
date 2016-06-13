@@ -28,6 +28,7 @@ public abstract class JoogarDatabase {
      */
     public JoogarDatabase(File gPath, boolean gWalMode) {
         path = gPath;
+        walMode = gWalMode;
     }
 
     /**
