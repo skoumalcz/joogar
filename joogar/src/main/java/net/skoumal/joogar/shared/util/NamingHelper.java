@@ -5,8 +5,11 @@ import net.skoumal.joogar.shared.dsl.Table;
 import net.skoumal.joogar.shared.dsl.TableIndex;
 
 import java.lang.reflect.Field;
+import java.util.Hashtable;
 
 public class NamingHelper {
+
+    private static Hashtable<Field, String> fieldToName = new Hashtable<>();
 
     /**
      * Converts a given CamelCasedString to lower_case_under_score.
@@ -59,12 +62,19 @@ public class NamingHelper {
      *         converted from CamelCase to UNDER_SCORE notation
      */
     public static String toSQLName(Field field) {
-        if (field.isAnnotationPresent(Column.class)) {
-            Column annotation = field.getAnnotation(Column.class);
-            return annotation.name();
+        String name = fieldToName.get(field);
+        if(name == null) {
+            if (field.isAnnotationPresent(Column.class)) {
+                Column annotation = field.getAnnotation(Column.class);
+                name = annotation.name();
+            } else {
+                name = toSQLNameDefault(field.getName());
+            }
+
+            fieldToName.put(field, name);
         }
 
-        return toSQLNameDefault(field.getName());
+        return name;
     }
 
     /**
