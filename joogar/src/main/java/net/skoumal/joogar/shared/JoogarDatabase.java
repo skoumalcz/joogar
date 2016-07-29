@@ -20,7 +20,7 @@ public abstract class JoogarDatabase {
 
     private File path;
 
-    private boolean walMode;
+    protected boolean walMode;
 
     /**
      * Create new database object.

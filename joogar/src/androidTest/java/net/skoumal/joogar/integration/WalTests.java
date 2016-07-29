@@ -10,7 +10,7 @@ import net.skoumal.joogar.util.model.StringFieldExtendedModel;
 public class WalTests extends CrudTestCase {
 
     public void testParallelReadDuringTransaction() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             final String preTransactionString = "Pre-transaction String";
             StringFieldExtendedModel preTransactionModel = new StringFieldExtendedModel(preTransactionString);
             final long preTransactionId = preTransactionModel.save();
@@ -18,7 +18,8 @@ public class WalTests extends CrudTestCase {
             JoogarRecord.openTransaction();
 
             String string = "Test String";
-            StringFieldExtendedModel model = new StringFieldExtendedModel(string);
+            StringFieldExtendedModel model = JoogarRecord.findById(StringFieldExtendedModel.class, preTransactionId);
+            model.setString(string);
             long id = model.save();
 
             Thread readThread = new Thread(new Runnable() {
@@ -42,7 +43,7 @@ public class WalTests extends CrudTestCase {
             StringFieldExtendedModel query = JoogarRecord.findById(StringFieldExtendedModel.class, id);
             assertEquals(string, query.getString());
         } else {
-            // WAL not supported for API < 16
+            // WAL not supported for API < 11
         }
     }
 }

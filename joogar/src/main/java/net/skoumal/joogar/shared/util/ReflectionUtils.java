@@ -169,6 +169,7 @@ public abstract class ReflectionUtils {
             if (result.isNull(columnIndex)) {
                 return;
             }
+
             if (fieldType.equals(long.class) || fieldType.equals(Long.class)) {
                 setFieldValueNative(object, field, result.getLong(columnIndex));
             } else if (fieldType.equals(String.class)) {

@@ -1,12 +1,14 @@
 package net.skoumal.joogar.integration;
 
 import android.nfc.Tag;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.test.AndroidTestCase;
 
 import net.skoumal.joogar.shared.Joogar;
 import net.skoumal.joogar.shared.JoogarDatabase;
 import net.skoumal.joogar.shared.JoogarDatabaseBuilder;
+import net.skoumal.joogar.shared.JoogarRecord;
 import net.skoumal.joogar.util.model.BigDecimalFieldAnnotatedModel;
 import net.skoumal.joogar.util.model.BigDecimalFieldExtendedModel;
 import net.skoumal.joogar.util.model.BooleanFieldAnnotatedModel;
@@ -239,6 +241,54 @@ public class JoogarTests extends AndroidTestCase {
             fail("Should throw IllegalStateException");
         } catch(IllegalStateException e) {
             // desired behaviour
+        }
+    }
+
+    public void testDisabledWal() {
+        JoogarDatabaseBuilder builder = new JoogarDatabaseBuilder()
+                .setDomainClasses(BooleanFieldAnnotatedModel.class)
+                .setWalMode(false);
+
+        Joogar.initForAndroid(getContext())
+                .addDB(builder);
+
+        Joogar joogar = Joogar.getInstance();
+
+        assertNotNull(joogar);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            JoogarRecord.openTransaction();
+
+            // this thread should get stuck
+            Thread readThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    // cannot read from database when transaction is running without wal mode
+                    JoogarRecord.findAll(BooleanFieldAnnotatedModel.class);
+                }
+            });
+            readThread.start();
+            try {
+                readThread.join(1000);
+            } catch (InterruptedException e) {
+                fail("Join was interrupted.");
+            }
+
+            assertTrue(readThread.isAlive());
+
+            JoogarRecord.commitTransaction();
+
+            // wait for thread to finished after closing transaction
+            try {
+                readThread.join(1000);
+            } catch (InterruptedException e) {
+                fail("Join was interrupted.");
+            }
+
+            assertFalse(readThread.isAlive());
+
+        } else {
+            // WAL not supported for API < 11
         }
     }
 

@@ -41,18 +41,20 @@ import java.util.List;
  */
 public class AndroidDatabase extends JoogarDatabase {
 
+    private static final boolean WAL_SUPPORTED = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+
     SQLiteDatabase db;
 
     private Hashtable<String, SQLiteStatement> precompiledStatements = new Hashtable<String, SQLiteStatement>();
 
     public AndroidDatabase(File gPath, boolean gWalMode) {
-        super(gPath, gWalMode);
+        super(gPath, gWalMode && WAL_SUPPORTED);
 
-        openDatabase(gPath, gWalMode);
+        openDatabase(gPath, gWalMode && WAL_SUPPORTED);
     }
 
     public AndroidDatabase(String gName, Context gContext, boolean gWalMode) {
-        super(gContext.getDatabasePath(gName), gWalMode);
+        super(gContext.getDatabasePath(gName), gWalMode && WAL_SUPPORTED);
 
         File path = getPath();
         File directory = path.getParentFile();
@@ -61,7 +63,7 @@ public class AndroidDatabase extends JoogarDatabase {
             directory.mkdirs();
         }
 
-        openDatabase(path, gWalMode);
+        openDatabase(path, gWalMode && WAL_SUPPORTED);
     }
 
     private void openDatabase(File gPath, boolean gWalMode) {
@@ -70,11 +72,19 @@ public class AndroidDatabase extends JoogarDatabase {
         if(gWalMode) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 flags = flags | SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;
-            } else {
-                Joogar.getInstance().getLogger().w("WAL is not supported on API levels below 16.");
             }
         }
         db = SQLiteDatabase.openDatabase(gPath.getPath(), new JoogarCursorFactory(), flags);
+
+        // backward compatibility hack to support WAL on pre-jelly-bean devices
+        if(gWalMode) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB &&
+                    Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                db.enableWriteAheadLogging();
+            } else {
+                Joogar.getInstance().getLogger().w("WAL is not supported on API levels below 11.");
+            }
+        }
     }
 
     @Override
@@ -133,6 +143,23 @@ public class AndroidDatabase extends JoogarDatabase {
         }
 
         return statement.executeInsert();
+    }
+
+    public void openTransaction() {
+        if(walMode) { // immediate transaction in WAL mode allows parallel reads and write
+            db.beginTransactionNonExclusive();
+        } else {
+            db.beginTransaction();
+        }
+    }
+
+    public void commitTransaction() {
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
+    public void rollbackTransaction() {
+        db.endTransaction();
     }
 
     @Override

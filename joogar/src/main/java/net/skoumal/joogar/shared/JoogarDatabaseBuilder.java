@@ -79,15 +79,17 @@ public class JoogarDatabaseBuilder {
     }
 
     /**
-     * Enables write-ahead-log (WAL) mode. Cannot be enabled for API levels below 16, for those will be
-     * silently ignored. For Android API level 16 and higher and for iOS is WAL enabled by default
+     * Enables write-ahead-log (WAL) mode. Cannot be enabled for API levels below 11, for those will be
+     * silently ignored. For Android API level 11 and higher and for iOS is WAL enabled by default
      * because of better performance in most of use-cases and ability to read while performing
      * transaction in the other thread.
      *
      * @param gWalMode true to enable write-ahead-log mode
      */
-    public void setWalMode(boolean gWalMode) {
+    public JoogarDatabaseBuilder setWalMode(boolean gWalMode) {
         walMode = gWalMode;
+
+        return this;
     }
 
     public boolean isWalMode() {
