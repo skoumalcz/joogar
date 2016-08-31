@@ -67,8 +67,7 @@ public class AndroidDatabase extends JoogarDatabase {
     }
 
     private void openDatabase(File gPath, boolean gWalMode) {
-        int flags = 0;
-        flags = SQLiteDatabase.CREATE_IF_NECESSARY;
+        int flags = SQLiteDatabase.CREATE_IF_NECESSARY;
         if(gWalMode) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 flags = flags | SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;

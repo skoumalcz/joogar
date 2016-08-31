@@ -36,6 +36,10 @@ public class BulkSaveTests extends CrudTestCase {
 
             index ++;
         }
+
+        cursor.close();
+
+        assertTrue(cursor.isClosed());
     }
 
     private List<StringFieldExtendedModel> prepareEntityList() {

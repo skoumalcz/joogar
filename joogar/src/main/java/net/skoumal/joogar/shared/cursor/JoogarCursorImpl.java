@@ -100,6 +100,7 @@ public class JoogarCursorImpl<T> implements JoogarCursor<T>, Iterator<T> {
      * Closes the Cursor, releasing all of its underlining resources.
      */
     public void close() {
+        isClosed = true;
         result.close();
     }
 

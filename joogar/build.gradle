@@ -13,8 +13,8 @@ ext {
     siteUrl = 'https://github.com/skoumalcz/joogar'
     gitUrl = 'https://github.com/skoumalcz/joogar.git'
 
-    libraryVersion = '0.1.8'
-    libraryVersionCode = 108
+    libraryVersion = '0.1.9'
+    libraryVersionCode = 109
 
     developerId = 'skoumal'
     developerName = 'SKOUMAL, s.r.o.'
