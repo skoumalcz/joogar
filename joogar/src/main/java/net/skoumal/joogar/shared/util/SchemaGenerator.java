@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import net.skoumal.joogar.shared.Joogar;
 import net.skoumal.joogar.shared.JoogarDatabase;
 import net.skoumal.joogar.shared.JoogarDatabaseResult;
+import net.skoumal.joogar.shared.JoogarMigration;
 import net.skoumal.joogar.shared.SQLException;
 import net.skoumal.joogar.shared.cursor.JoogarCursor;
 import net.skoumal.joogar.shared.cursor.JoogarCursorImpl;
@@ -18,7 +19,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,10 +50,10 @@ public class SchemaGenerator {
             upgradeTableIndexes(domain);
         }
 
-        executeJoogarUpgrade(0, gVersion, true);
+        executeJoogarUpgrade(0, gVersion, true, new ArrayList<JoogarMigration>());
     }
 
-    public void doUpgrade(int gOldVersion, int gNewVersion, List<Class> gDomainClasses) {
+    public void doUpgrade(int gOldVersion, int gNewVersion, List<Class> gDomainClasses, List<JoogarMigration> migrations) {
         String sql = "select count(*) from sqlite_master where type='table' and name LIKE '%s';";
         for (Class domain : gDomainClasses) {
             JoogarDatabaseResult result = database.rawQuery(String.format(sql, NamingHelper.toSQLName(domain)), null);
@@ -64,7 +67,7 @@ public class SchemaGenerator {
 
             result.close();
         }
-        executeJoogarUpgrade(gOldVersion, gNewVersion, false);
+        executeJoogarUpgrade(gOldVersion, gNewVersion, false, migrations);
     }
 
     /**
@@ -201,7 +204,7 @@ public class SchemaGenerator {
 //        }
 //    }
 
-    private boolean executeJoogarUpgrade(int gOldVersion, int gNewVersion, boolean isFirstInit) {
+    private boolean executeJoogarUpgrade(int gOldVersion, int gNewVersion, boolean isFirstInit, List<JoogarMigration> migrations) {
         boolean isSuccess = false;
 
         List<String> files = Joogar.getInstance().getSystemUtils().getUpgradeScripts(databaseName);
@@ -223,6 +226,24 @@ public class SchemaGenerator {
                 Joogar.getInstance().getLogger().w("Not a joogar script. Ignored." + file);
             }
 
+        }
+
+        Collections.sort(migrations, new Comparator<JoogarMigration>() {
+            @Override
+            public int compare(JoogarMigration o1, JoogarMigration o2) {
+                if (o1.startVersion < o2.startVersion) {
+                    return -1;
+                } else if (o1.startVersion > o2.startVersion) {
+                    return 1;
+                }
+                return o1.endVersion - o2.endVersion;
+            }
+        });
+
+        for (JoogarMigration migration : migrations) {
+            if (migration.startVersion >= gOldVersion && migration.endVersion <= gNewVersion) {
+                migration.migrate(database);
+            }
         }
 
         return isSuccess;

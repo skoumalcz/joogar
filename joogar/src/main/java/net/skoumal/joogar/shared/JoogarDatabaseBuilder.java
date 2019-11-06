@@ -4,6 +4,7 @@ import net.skoumal.joogar.shared.util.SchemaGenerator;
 
 import java.io.File;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class JoogarDatabaseBuilder {
     private File dbPath;
     private String dbName = "joogar";
     private List<Class> domainClasses;
+    private List<JoogarMigration> migrations = new ArrayList<>();
 
     /**
      * Enables write-ahead-log mode. Enabled by default because of better performance in most of
@@ -74,6 +76,11 @@ public class JoogarDatabaseBuilder {
         return this;
     }
 
+    public JoogarDatabaseBuilder addMigrations(JoogarMigration... migrations) {
+        this.migrations.addAll(Arrays.asList(migrations));
+        return this;
+    }
+
     public List<Class> getDomainClasses() {
         return domainClasses;
     }
@@ -107,7 +114,7 @@ public class JoogarDatabaseBuilder {
         if (currentVersion > requiredVersion) {
             throw new RuntimeException("Version downgrade is currently not supported.");
         } else if(currentVersion < requiredVersion) {
-            schemaGenerator.doUpgrade(currentVersion, requiredVersion, domainClasses);
+            schemaGenerator.doUpgrade(currentVersion, requiredVersion, domainClasses, migrations);
         }
 
         db.setVersion(requiredVersion);
