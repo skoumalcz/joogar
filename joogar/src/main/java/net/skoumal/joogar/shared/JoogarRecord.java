@@ -22,11 +22,15 @@ public class JoogarRecord {
     protected Long id = null;
 
     public static <T> int deleteAll(Class<T> type) {
-        return Joogar.getInstance().getDB(type).delete(NamingHelper.toSQLName(type), null, null);
+        return deleteAll(type, null);
     }
 
     public static <T> int deleteAll(Class<T> type, String whereClause, String... whereArgs) {
-        return Joogar.getInstance().getDB(type).delete(NamingHelper.toSQLName(type), whereClause, whereArgs);
+        return deleteAll(Joogar.getInstance().getDB(type), type, whereClause, whereArgs);
+    }
+
+    public static <T> int deleteAll(JoogarDatabase db, Class<T> type, String whereClause, String... whereArgs) {
+        return db.delete(NamingHelper.toSQLName(type), whereClause, whereArgs);
     }
 
     @SuppressWarnings("deprecation")
@@ -106,6 +110,10 @@ public class JoogarRecord {
         return find(type, whereClause, whereArgs, null, null, null, null);
     }
 
+    public static <T> JoogarCursor<T> find(JoogarDatabase database, Class<T> type, String whereClause, String... whereArgs) {
+        return find(database, type, whereClause, whereArgs, null, null, null, null);
+    }
+
     public static <T> JoogarCursor<T> findWithQuery(Class<T> type, String query, String... arguments) {
         JoogarDatabase database = Joogar.getInstance().getDB(type);
         JoogarDatabaseResult result = database.rawQuery(query, arguments);
@@ -133,9 +141,12 @@ public class JoogarRecord {
     }
 
     public static <T> JoogarCursor<T> find(Class<T> type, String whereClause, String[] whereArgs,
-                                   String groupBy, String orderBy, String limit, Prefetch ... prefetches) {
-        JoogarDatabase database = Joogar.getInstance().getDB(type);
+                                           String groupBy, String orderBy, String limit, Prefetch ... prefetches) {
+        return find(Joogar.getInstance().getDB(type), type, whereClause, whereArgs, groupBy, orderBy, limit, prefetches);
+    }
 
+    public static <T> JoogarCursor<T> find(JoogarDatabase database, Class<T> type, String whereClause, String[] whereArgs,
+                                           String groupBy, String orderBy, String limit, Prefetch ... prefetches) {
         //List<T> toRet = new ArrayList<T>();
         String table = NamingHelper.toSQLName(type);
         List<String> columns = new ArrayList<>();
@@ -219,7 +230,15 @@ public class JoogarRecord {
         return saveInternal(object);
     }
 
+    public static long save(JoogarDatabase database, Object object) {
+        return saveInternal(database, object);
+    }
+
     private static long saveInternal(Object object) {
+        return saveInternal(Joogar.getInstance().getDB(object.getClass()), object);
+    }
+
+    private static long saveInternal(JoogarDatabase database, Object object) {
         List<Field> columns = Joogar.getInstance().getReflectionUtils().getTableFields(object.getClass());
 
         Object [] values = new Object[columns.size()];
@@ -235,7 +254,6 @@ public class JoogarRecord {
             }
         }
 
-        JoogarDatabase database = Joogar.getInstance().getDB(object.getClass());
         long id = database.insertOrUpdate(NamingHelper.toSQLName(object.getClass()), columns, values);
 
         if(id > 0) {
