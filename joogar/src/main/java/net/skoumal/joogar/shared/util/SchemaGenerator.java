@@ -205,6 +205,10 @@ public class SchemaGenerator {
 //    }
 
     private boolean executeJoogarUpgrade(int gOldVersion, int gNewVersion, boolean isFirstInit, List<JoogarMigration> migrations) {
+        if(Joogar.isDebug()) {
+            Joogar.getInstance().getLogger().i("Executing joogar upgrade from " + gOldVersion + " to " + gNewVersion);
+        }
+
         boolean isSuccess = false;
 
         List<String> files = Joogar.getInstance().getSystemUtils().getUpgradeScripts(databaseName);
@@ -225,7 +229,10 @@ public class SchemaGenerator {
             } catch (NumberFormatException e) {
                 Joogar.getInstance().getLogger().w("Not a joogar script. Ignored." + file);
             }
+        }
 
+        if(Joogar.isDebug()) {
+            Joogar.getInstance().getLogger().i("Found " + migrations.size() + " migrations.");
         }
 
         Collections.sort(migrations, new Comparator<JoogarMigration>() {
@@ -243,6 +250,9 @@ public class SchemaGenerator {
         for (JoogarMigration migration : migrations) {
             if (migration.startVersion >= gOldVersion && migration.endVersion <= gNewVersion) {
                 migration.migrate(database);
+                if(Joogar.isDebug()) {
+                    Joogar.getInstance().getLogger().i("Executing migration from " + migration.startVersion + " to " + migration.endVersion);
+                }
             }
         }
 
